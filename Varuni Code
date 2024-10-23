@@ -1,0 +1,460 @@
+import sqlite3
+import tkinter as tk
+from tkinter import messagebox, ttk , simpledialog
+from datetime import datetime, timedelta, date
+from tkinter import Tk, Label, Entry, Button, messagebox
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
+from tkcalendar import Calendar
+from datetime import datetime
+
+root = tk.Tk()
+root.title("Purchase Transaction App")
+
+# Center the window on the screen
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+window_width = 800
+window_height = 600
+x_position = (screen_width - window_width) // 2
+y_position = (screen_height - window_height) // 2
+root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+
+# Styling
+bg_color = "white"
+font_style = ("Arial", 12)
+font_style1 = ("Arial", 8)
+header_font = ("Arial", 20, "bold")
+header_font1 = ("Arial", 12, "bold")
+small_font_style = ("Arial", 10)
+
+# Create a frame with a dark blue color
+frame = tk.Frame(root, bg="#CED2CC")
+frame.pack(fill="both", expand=True)
+
+# Connect to the database and create a cursor
+conn = sqlite3.connect("aging.db")
+cursor = conn.cursor()
+
+header1_label = tk.Label(frame, text="AGING REPORT", font=header_font, fg="white", bg="#1F3F49")
+header1_label.place(relx=0.46, rely=0.43, anchor="center")
+
+# Add a header label to the frame
+header_label = tk.Label(frame, text="INVOICE ENTRY", font=header_font1, fg="white", bg="#1F3F49")
+header_label.place(relx=0.2, rely=0.05, anchor="center")
+
+# Entry for Invoice Number
+invoice_number_label = tk.Label(frame, text="Invoice Number:", font=font_style, width=23, bg=bg_color)
+invoice_number_label.place(relx=0.05, rely=0.1, anchor="w")
+invoice_number_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+invoice_number_entry.place(relx=0.2, rely=0.1, anchor="w")
+
+# Combobox for Vendor Name
+cursor.execute("SELECT Name FROM MASTER")
+vendor_names = [row[0] for row in cursor.fetchall()]
+vendor_name_label = tk.Label(frame, text="Vendor Name:", font=font_style, width=23, bg=bg_color)
+vendor_name_label.place(relx=0.05, rely=0.15, anchor="w")
+vendor_name_combobox = ttk.Combobox(frame, values=[" "] + vendor_names, font=font_style, width=21)
+vendor_name_combobox.set("")
+vendor_name_combobox.place(relx=0.2, rely=0.15, anchor="w")
+
+# Entry for Invoice Date
+invoice_date_label = tk.Label(frame, text="Invoice Date (DD-MM-YYYY):", font=font_style, width=23, bg=bg_color)
+invoice_date_label.place(relx=0.05, rely=0.2, anchor="w")
+invoice_date_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+invoice_date_entry.place(relx=0.2, rely=0.2, anchor="w")
+
+# Entry for Description
+description_label = tk.Label(frame, text="Description:", font=font_style, width=23, bg=bg_color)
+description_label.place(relx=0.05, rely=0.25, anchor="w")
+description_entry1 = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+description_entry1.place(relx=0.2, rely=0.25, anchor="w")
+
+# Entry for Gold Amount
+Gold_amount_label = tk.Label(frame, text="Gold Amount:", font=font_style, width=23, bg=bg_color)
+Gold_amount_label.place(relx=0.05, rely=0.3, anchor="w")
+Gold_amount_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+Gold_amount_entry.place(relx=0.2, rely=0.3, anchor="w")
+
+# Entry for Diamond Amount
+Diamond_amount_label = tk.Label(frame, text="Diamond Amount:", font=font_style, width=23, bg=bg_color)
+Diamond_amount_label.place(relx=0.05, rely=0.35, anchor="w")
+Diamond_amount_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+Diamond_amount_entry.place(relx=0.2, rely=0.35, anchor="w")
+
+# Additional GUI elements
+payment_entry = tk.Label(frame, text="PAYMENT ENTRY", font=header_font1,fg = "white" ,bg="#1F3F49")
+payment_entry.place(relx=0.76, rely=0.05, anchor="center")
+label_invoice = tk.Label(frame, text="Invoice No, Vendor Name", font=font_style, width=23, bg=bg_color)
+label_invoice.place(relx=0.75, rely=0.10, anchor="e")
+
+combinations = cursor.execute("SELECT DISTINCT InvoiceNo || ', ' || VendorName FROM AGING ORDER BY InvoiceNo, VendorName").fetchall()
+combo_values = [str(row[0]) for row in combinations]
+combo_values.insert(0, "SELECT") # Add "SELECT" to the list of values
+combo_combobox = ttk.Combobox(frame, values=combo_values, font=font_style, width=21)
+combo_combobox.place(relx=0.9, rely=0.10, anchor="e")
+combo_combobox.set("SELECT") 
+
+Gold_amount_payable_label = tk.Label(frame, text="Amount Payable Gold:", font=font_style, width=23, bg=bg_color)
+Gold_amount_payable_label.place(relx=0.75, rely=0.15, anchor="e")
+Diamond_amount_payable_label = tk.Label(frame, text="Amount Payable Diamond:", font=font_style, width=23, bg=bg_color)
+Diamond_amount_payable_label.place(relx=0.75, rely=0.2, anchor="e")
+
+Gold_amount_payable_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+Gold_amount_payable_entry.place(relx=0.9, rely=0.15, anchor="e")
+Diamond_amount_payable_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+Diamond_amount_payable_entry.place(relx=0.9, rely=0.2, anchor="e")
+
+date_label = tk.Label(frame, text="Date (DD-MM-YYYY):", font=font_style, width=23, bg=bg_color)
+date_label.place(relx=0.75, rely=0.25, anchor="e")
+date_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+date_entry.place(relx=0.9, rely=0.25, anchor="e")
+
+purchasetype_label = tk.Label(frame, text="Purchase Type:", font=font_style, width=23, bg=bg_color)
+purchasetype_label.place(relx=0.75, rely=0.3, anchor="e")
+
+options = ["Gold", "Diamond"]
+Gold_Diamond_combobox = ttk.Combobox(frame, values=options, font=font_style, width=21)
+Gold_Diamond_combobox.set(options[0])
+Gold_Diamond_combobox.place(relx=0.9, rely=0.3, anchor="e")
+
+amount_label = tk.Label(frame, text="Amount:", font=font_style, width=23, bg=bg_color)
+amount_label.place(relx=0.75, rely=0.35, anchor="e")
+amount_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+amount_entry.place(relx=0.9, rely=0.35, anchor="e")
+
+description_label = tk.Label(frame, text="Description:", font=font_style, width=23, bg=bg_color)
+description_label.place(relx=0.75, rely=0.4, anchor="e")
+description_entry = tk.Entry(frame, font=font_style, width=23, bg=bg_color)
+description_entry.place(relx=0.9, rely=0.4, anchor="e")
+
+def OPEN_vendor_details_dialog():
+    dialog = tk.Toplevel(root)
+    dialog.title("Vendor Details")
+
+    # Calculate the center coordinates of the screen
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    dialog_width = 300 # Width of the dialog
+    dialog_height = 120 # Height of the dialog
+    x = 560
+    y = 200
+
+    # Set the position of the dialog
+    dialog.geometry(f"{dialog_width}x{dialog_height}+{x}+{y}")
+
+    label_width = 15
+    entry_width = 25
+    style = ttk.Style()
+    style.configure("Custom.TButton", background="#800080")
+
+    ttk.Label(dialog, text="NAME:", background=bg_color, font=font_style1, width=label_width, anchor="center").grid(row=0,
+                                                                                                                    sticky="w")
+    ttk.Label(dialog, text="MOBILE:", background=bg_color, font=font_style1, width=label_width, anchor="center").grid(
+        row=1, sticky="w")
+    ttk.Label(dialog, text="ADDRESS:", background=bg_color, font=font_style1, width=label_width, anchor="center").grid(
+        row=2, sticky="w")
+
+    name_entry = ttk.Entry(dialog, width=entry_width)
+    mobile_entry = ttk.Entry(dialog, width=entry_width)
+    address_entry = ttk.Entry(dialog, width=entry_width)
+
+    name_entry.grid(row=0, column=1)
+    mobile_entry.grid(row=1, column=1)
+    address_entry.grid(row=2, column=1)
+
+    conn = sqlite3.connect("aging.db")
+    cursor = conn.cursor()
+
+    def save_vendor_details():
+        name = name_entry.get().strip().upper() # Convert to uppercase and remove leading/trailing spaces
+        mobile = mobile_entry.get().strip()
+        address = address_entry.get().strip().upper() # Convert to uppercase and remove leading/trailing spaces
+
+        # Check if all fields are filled
+        if not name or not mobile or not address:
+            messagebox.showerror("Error", "All fields are mandatory.")
+            return
+
+        # Check if mobile is a 10-digit number
+        if not mobile.isdigit() or len(mobile) != 10:
+            messagebox.showerror("Error", "Mobile number must be a 10-digit number.")
+            return
+
+        connection = sqlite3.connect("aging.db")
+        cursor = connection.cursor()
+
+        # Insert data into the MASTER table
+        cursor.execute("INSERT INTO MASTER (Name, Mobile, Address) VALUES (?, ?, ?)", (name, mobile, address))
+        connection.commit()
+        messagebox.showinfo("Success", "Vendor Details Saved!")
+
+        # Update the list of vendor names and the combobox
+        vendor_names.append(name) # Add the new vendor name to the list
+        vendor_name_combobox['values'] = vendor_names # Update the combobox values
+        vendor_name_combobox.set(name) # Set the combobox to the new vendor name
+        dialog.destroy()
+
+    def CLOSE_connection():
+        connection.CLOSE()
+
+    save_button = ttk.Button(dialog, text="Save", style="Custom.TButton", command=save_vendor_details)
+    save_button.place(relx=0.22, rely=0.73)
+
+    cancel_button = ttk.Button(dialog, text="Cancel", style="Custom.TButton", command=dialog.destroy)
+    cancel_button.place(relx=0.53, rely=0.73)
+
+btnVendorDetails = ttk.Button(frame, text="Add New Vendor", command=OPEN_vendor_details_dialog, style='TButton')
+btnVendorDetails.place(relx=0.35, rely=0.13) # Adjust the position as needed
+
+style = ttk.Style()
+style.configure('TButton', font=font_style, fg="white", bg="white")
+
+def IT1():
+    input_transaction()
+    set_current_date()
+    display_database_contents()
+    invoice_number_entry.delete(0, tk.END)
+    vendor_name_combobox.set("")
+    description_entry1.delete(0, tk.END)
+    Gold_amount_entry.delete(0, tk.END)
+    Diamond_amount_entry.delete(0, tk.END)
+
+def set_current_date():
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    invoice_date_entry.delete(0, tk.END)
+    invoice_date_entry.insert(0, current_date)
+    date_entry.delete(0, tk.END)
+    date_entry.insert(0, current_date)
+
+set_current_date()
+
+# Define the update_combobox function
+def update_combobox(event):
+    user_input = vendor_name_combobox.get().lower()
+    filtered_names = [name for name in vendor_names if name.lower().startswith(user_input)]
+    vendor_name_combobox['values'] = filtered_names
+    if not filtered_names:
+        show_no_matching_names_error()
+
+# Define the show_no_matching_names_error function
+def show_no_matching_names_error():
+    messagebox.showerror("Error", "No matching vendor names found.")
+    vendor_name_combobox.set("")
+
+# Bind the update_combobox function to the vendor name combobox
+vendor_name_combobox.bind("<KeyRelease>", update_combobox)
+    
+def input_transaction():
+    # Get values from the entry widgets
+    invoice_number = invoice_number_entry.get()
+    vendor_name = vendor_name_combobox.get()
+    invoice_date = invoice_date_entry.get()
+    description = description_entry1.get()
+
+    # Validate the input data
+    if not invoice_number or not vendor_name or not invoice_date:
+        messagebox.showerror("Error", "Invoice Number, Vendor Name, Invoice Date, and Description are mandatory fields.")
+        return
+
+    # Convert Gold_amount to float if it is not empty
+    Gold_amount = Gold_amount_entry.get()
+    if Gold_amount:
+        try:
+            Gold_amount = float(Gold_amount)
+            # Calculate DueDate for Gold and AgingDays
+            Gold_duedate = (datetime.strptime(invoice_date, "%d-%m-%Y") + timedelta(days=15)).strftime("%d-%m-%Y")
+            Gold_agingdays = (datetime.now() - datetime.strptime(Gold_duedate, "%d-%m-%Y")).days
+            # Insert data into the AGING table for Gold
+            cursor.execute(
+                "INSERT INTO AGING (InvoiceNo, VendorName, InvoiceDate, Description, PurchaseType, DueDate, Amount, AgingDays) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (invoice_number, vendor_name, invoice_date, description, 'Gold', Gold_duedate, Gold_amount, Gold_agingdays)
+            )
+        except ValueError:
+            messagebox.showerror("Error", "Gold Amount must be numeric.")
+            return
+
+    # Convert Diamond_amount to float if it is not empty
+    Diamond_amount = Diamond_amount_entry.get()
+    if Diamond_amount:
+        try:
+            Diamond_amount = float(Diamond_amount)
+            # Calculate DueDate for Diamond and AgingDays
+            Diamond_duedate = (datetime.strptime(invoice_date, "%d-%m-%Y") + timedelta(days=60)).strftime("%d-%m-%Y")
+            Diamond_agingdays = (datetime.now() - datetime.strptime(Diamond_duedate, "%d-%m-%Y")).days
+            # Insert data into the AGING table for Diamond
+            cursor.execute(
+                "INSERT INTO AGING (InvoiceNo, VendorName, InvoiceDate, Description, PurchaseType, DueDate, Amount, AgingDays) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (invoice_number, vendor_name, invoice_date, description, 'Diamond', Diamond_duedate, Diamond_amount, Diamond_agingdays)
+            )
+        except ValueError:
+            messagebox.showerror("Error", "Diamond Amount must be numeric.")
+            return
+
+    conn.commit()
+
+    # Show a success message
+    messagebox.showinfo("Success", "Transaction data saved successfully.")
+    display_database_contents()
+    tree.bind("<Double-1>", on_treeview_double_click)
+    
+def update_amount_payable():
+    # Calculate the total paid amount by summing the values in the Payment columns
+    cursor.execute('''
+        UPDATE AGING
+        SET AmountPaid = COALESCE(Payment1, 0) + COALESCE(Payment2, 0) + COALESCE(Payment3, 0) + COALESCE(Payment4, 0) + COALESCE(Payment5, 0)
+    ''')
+
+    # Update Amount Payable based on the total Amount and Amount Paid
+    cursor.execute('''
+        UPDATE AGING
+        SET AmountPayable = Amount - COALESCE(AmountPaid, 0)
+    ''')
+    conn.commit()
+    
+# Call this function after inserting or updating records in the AGING table
+update_amount_payable()
+
+tk.Button(frame, text="SUBMIT", command=IT1, font=font_style,fg="white", bg="#36619f" ).place(relx=0.2, rely=0.4, anchor="center")
+
+tree = ttk.Treeview(frame)
+tree.place(relx=0.5, rely=0.8, anchor="center", relwidth=0.9)
+
+
+# Create a frame for totals at the bottom
+totals_frame = tk.Frame(frame, bg="#CED2CC")
+totals_frame.place(relx=0.79, rely=0.59, anchor="center")
+totals_font_style = ("Arial", 11)
+
+# Pack your labels into this frame
+total_amount_label = tk.Label(totals_frame, text="Amount: 0", font=totals_font_style,fg="white", bg="#36619f")
+total_amount_label.grid(row=0, column=0, padx=10) # Increased padding for more space
+
+total_amount_payable_label = tk.Label(totals_frame, text="Amount Payable: 0", font=totals_font_style,fg="white", bg="#36619f")
+total_amount_payable_label.grid(row=0, column=1, padx=10)
+
+total_amount_paid_label = tk.Label(totals_frame, text="Amount Paid: 0", font=totals_font_style,fg="white", bg="#36619f")
+total_amount_paid_label.grid(row=0, column=2, padx=10)
+
+def calculate_totals():
+    total_amount = 0
+    total_amount_payable = 0
+    total_amount_paid = 0
+
+    for child in tree.get_children():
+        # Assuming the indexes of the columns are known (e.g., 5 for Amount, 6 for Amount Payable, 7 for Amount Paid)
+        data = tree.item(child, 'values')
+        total_amount += float(data[5])
+        total_amount_payable += float(data[7])
+        total_amount_paid += float(data[8])
+
+    # Display these totals in labels or any other GUI element at the bottom
+    total_amount_label.config(text=f"Amount: {total_amount}")
+    total_amount_payable_label.config(text=f"Amount Payable: {total_amount_payable}")
+    total_amount_paid_label.config(text=f"Amount Paid: {total_amount_paid}")
+    
+
+def display_database_contents():
+    global tree
+
+    # Clear existing data in the Treeview
+    for item in tree.get_children():
+        tree.delete(item)
+    
+    # Fetch column names from the AGING table
+    cursor.execute("PRAGMA table_info(AGING)")
+    column_names = [row[1] for row in cursor.fetchall()]
+    start_index = column_names.index('InvoiceNo') # Ensure this is the correct column name
+
+    # Create a new Treeview widget
+    tree = ttk.Treeview(frame, height=13)
+    columns_to_display = column_names[start_index:]
+
+    tree["columns"] = tuple(columns_to_display)
+    for col in columns_to_display:
+        tree.heading(col, text=col, anchor="center")
+        tree.column(col, width=100, anchor="center")
+
+    tree.column("#0", width=0, stretch=tk.FALSE)
+    tree.place(relx=0.5, rely=0.8, anchor="center", relwidth=0.9)
+
+    # Add scrollbars to the Treeview
+    v_scrollbar = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+    v_scrollbar.place(relx=0.95, rely=0.8, relheight=0.36, anchor="center", relwidth=0.01)
+    tree.config(yscrollcommand=v_scrollbar.set)
+
+    h_scrollbar = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+    h_scrollbar.place(relx=0.5, rely=0.98, relwidth=0.9, anchor="center", relheight=0.015)
+    tree.config(xscrollcommand=h_scrollbar.set)
+
+    # Adjust the query to display records with non-zero AmountPayable
+    cursor.execute("SELECT * FROM AGING")
+    for row in cursor.fetchall():
+        tree.insert("", "end", values=row[start_index:])
+    calculate_totals()
+    
+
+    # Binding the double click event to the treeview
+    tree.bind("<Double-1>", on_treeview_double_click)
+
+    frame.update()
+   
+def clear_entry_boxes():
+    Gold_amount_payable_entry.delete(0, 'end')
+    Diamond_amount_payable_entry.delete(0, 'end')
+    amount_entry.delete(0, 'end')
+    
+def set_amount_payable(combined_info):
+    # Get the selected values from the combined_info string
+    invoice_no, vendor_name = combined_info.split(", ")
+
+    # Fetch the purchase type and amount payable from the database
+    cursor.execute("SELECT PurchaseType, AmountPayable FROM AGING WHERE InvoiceNo = ? AND VendorName = ?", (invoice_no, vendor_name))
+    result = cursor.fetchone()
+
+    if result:
+        purchase_type, amount_payable = result
+        if purchase_type == 'Gold':
+            Gold_amount_payable_entry.delete(0, 'end')
+            Gold_amount_payable_entry.insert(0, amount_payable)
+        elif purchase_type == 'Diamond':
+            Diamond_amount_payable_entry.delete(0, 'end')
+            Diamond_amount_payable_entry.insert(0, amount_payable)
+
+def on_treeview_double_click(event):
+    selected_item = tree.selection()
+    if selected_item:
+        clear_entry_boxes() # Function to clear GUI elements
+
+        selected_data = tree.item(selected_item, 'values')
+        if selected_data:
+            invoice_no = selected_data[0]
+            vendor_name = selected_data[1]
+            purchase_type = selected_data[4] # Extract the purchase type
+            amount_payable = selected_data[8] # Assuming amount payable is at this index
+
+            combined_info = f"{invoice_no}, {vendor_name}"
+            combo_combobox.set(combined_info)
+            Gold_Diamond_combobox.set(purchase_type)
+
+            if purchase_type == 'Gold':
+                Gold_amount_payable_entry.delete(0, tk.END)
+                Gold_amount_payable_entry.insert(0, amount_payable)
+            elif purchase_type == 'Diamond':
+                Diamond_amount_payable_entry.delete(0, tk.END)
+                Diamond_amount_payable_entry.insert(0, amount_payable)
+
+# Update the Treeview widget by displaying the database contents
+display_database_contents()
+
+def update_payment_details():
+    # Extract the selected invoice number and vendor name
+    combined_info = combo_combobox.get()
+    invoice_no, vendor_name = combined_info.split(", ")
+    purchase_type = Gold_Diamond_combobox.get()
+
+    date_fields = ['Date1', 'Date2', 'Date3', 'Date4', 'Date5']
+
+    # Fetch the existing payment details for the selected invoice
+    cursor.execute("SELECT * FROM AGING WHERE InvoiceNo = ? AND VendorName = ? AND PurchaseType = ?", 
+
